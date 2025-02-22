@@ -28,8 +28,8 @@ Keyboard Controls
 -----------------
 
 ```
-j, ←, ↓, <Tab>         Select next track
-k, →, ↑, <Shift+Tab>   Select previous track
+j, →, ↓, <Tab>         Select next track
+k, ←, ↑, <Shift+Tab>   Select previous track
 
 <Enter>   Play selected track
 <Space>   Play/Pause current track
