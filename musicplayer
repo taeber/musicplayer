@@ -71,30 +71,30 @@ document.body.addEventListener("keydown", (e) => {
     case "j":
     case "ArrowRight":
     case "ArrowDown": {
-			const links = tracklist.querySelectorAll("li a")
-			let next
-			for (let i = 0; i < links.length; i++) {
-				if (document.activeElement === links[i]) {
-					next = links[(i+1) % links.length]
-					break
-				}
-			}
-			next.focus()
-			break
-		}
+      const links = tracklist.querySelectorAll("li a")
+      let next
+      for (let i = 0; i < links.length; i++) {
+        if (document.activeElement === links[i]) {
+          next = links[(i+1) % links.length]
+          break
+        }
+      }
+      next.focus()
+      break
+    }
     case "k":
     case "ArrowLeft":
     case "ArrowUp": {
-			const links = tracklist.querySelectorAll("li a")
-			let next
-			for (let i = 0; i < links.length; i++) {
-				if (document.activeElement === links[i]) {
-					next = i === 0 ? links[links.length-1] : links[i-1]
-					break
-				}
-			}
-			next.focus()
-			break
+      const links = tracklist.querySelectorAll("li a")
+      let next
+      for (let i = 0; i < links.length; i++) {
+        if (document.activeElement === links[i]) {
+          next = i === 0 ? links[links.length-1] : links[i-1]
+          break
+        }
+      }
+      next.focus()
+      break
     }
     default:
       console.debug(e)
