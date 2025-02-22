@@ -1,0 +1,146 @@
+#!/usr/bin/env deno serve --allow-read
+
+function musicPlayer(localroot, files) {
+  return `
+<!doctype html>
+<html lang="en-US">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Music in ${localroot}</title>
+  <style>
+body {
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  font-size: 16px;
+}
+
+a { text-decoration: none }
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+li {
+  padding-bottom: 0.5em
+}
+
+
+  </style>
+</head>
+<body>
+  <h1>${localroot}</h1>
+  <ul>
+    ${files.map(f => `
+      <li>
+        <a href="/${f}" target="_blank">${decodeURIComponent(f)}</a>
+      </li>
+    `).join("")}
+  </ul>
+  <video height=64></video>
+
+  <script>
+const player = document.querySelector("video")
+
+const tracklist = document.querySelector("ul")
+for (const link of tracklist.querySelectorAll("li a")) {
+  link.addEventListener("click", (e) => {
+    e.preventDefault()
+    player.controls = true
+    player.src = link.href
+    document.title = link.textContent
+    setTimeout(() => player.play(), 0)
+  })
+}
+
+tracklist.querySelector("a").focus()
+
+document.body.addEventListener("keydown", (e) => {
+  if (e.defaultPrevented) return
+
+  switch (e.key) {
+    case " ": {
+      if (player.paused) {
+        player.play()
+      } else {
+        player.pause()
+      }
+      break
+    }
+    case "j":
+    case "ArrowRight":
+    case "ArrowDown": {
+			const links = tracklist.querySelectorAll("li a")
+			let next
+			for (let i = 0; i < links.length; i++) {
+				if (document.activeElement === links[i]) {
+					next = links[(i+1) % links.length]
+					break
+				}
+			}
+			next.focus()
+			break
+		}
+    case "k":
+    case "ArrowLeft":
+    case "ArrowUp": {
+			const links = tracklist.querySelectorAll("li a")
+			let next
+			for (let i = 0; i < links.length; i++) {
+				if (document.activeElement === links[i]) {
+					next = i === 0 ? links[links.length-1] : links[i-1]
+					break
+				}
+			}
+			next.focus()
+			break
+    }
+    default:
+      console.debug(e)
+      break
+  }
+})
+  </script>
+</body>
+</html>
+  `.trim()
+}
+
+const exclude = [
+  ".DS_Store",
+]
+
+export default {
+  async fetch(req) {
+    const url = new URL(req.url)
+    if (url.pathname === "/") {
+      let files = []
+      for await (const file of Deno.readDir(".")) {
+        if (!file.isFile) continue
+        if (exclude.includes(file.name)) continue
+        files.push(file.name)
+      }
+      files.sort()
+           .map(encodeURIComponent)
+      console.log(Deno.cwd(), files)
+      const html = musicPlayer(Deno.cwd(), files)
+
+      return new Response(html, {
+        headers: {
+          "Content-Type": "text/html",
+        }
+      })
+    } else {
+      try {
+        const decoded = decodeURIComponent(url.pathname)
+        const file = await Deno.open("." + decoded, { read: true });
+        return new Response(file.readable)
+      } catch {
+        return new Response(null, {status: 404})
+      }
+    }
+  }
+}
+
+// vim: set ts=2 sw=2 sts=2:
